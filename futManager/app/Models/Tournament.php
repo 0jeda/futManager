@@ -21,11 +21,17 @@ class Tournament extends Model
         'start_date',
         'end_date',
         'description',
+        'is_bracket',
+        'bracket_size',
+        'bracket_data',
+        'winner_id',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'is_bracket' => 'boolean',
+        'bracket_data' => 'array',
     ];
 
     public function field(): BelongsTo
@@ -43,6 +49,11 @@ class Tournament extends Model
 
     public function matches(): HasMany
     {
-        return $this->hasMany(Game::class, 'tournament_id');
+        return $this->hasMany(Game::class, 'tournament_id')->orderBy('scheduled_at');
+    }
+
+    public function winner(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'winner_id');
     }
 }

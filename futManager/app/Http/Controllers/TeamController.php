@@ -40,6 +40,9 @@ class TeamController extends Controller
 
     public function edit(Team $team): View
     {
+        $team->load(['players' => function($query) {
+            $query->orderByRaw('CASE WHEN number IS NULL THEN 1 ELSE 0 END, number ASC');
+        }]);
         return view('teams.edit', compact('team'));
     }
 

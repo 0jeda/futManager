@@ -34,6 +34,16 @@
                             {{ __('Equipos') }}
                         </flux:navlist.item>
                     @endcan
+                    @can('manage-teams')
+                        <flux:navlist.item
+                            icon="trophy"
+                            :href="route('tournaments.index')"
+                            :current="request()->routeIs('tournaments.*')"
+                            wire:navigate
+                        >
+                            {{ __('Torneos') }}
+                        </flux:navlist.item>
+                    @endcan
                 </flux:navlist.group>
             </flux:navlist>
 

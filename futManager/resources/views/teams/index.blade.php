@@ -24,17 +24,16 @@
         @endif
 
         @if ($teams->count())
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach ($teams as $team)
-                    <article class="rounded-2xl border border-neutral-200 bg-white/95 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-neutral-700 dark:bg-zinc-900/80 dark:shadow-black/20">
-                        <header class="flex items-start gap-3">
-                            <div class="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg border border-neutral-200 shadow-sm dark:border-neutral-700" style="width:80px; height:80px;">
+                    <article class="rounded-2xl border border-neutral-200 bg-white/95 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-neutral-700 dark:bg-zinc-900/80 dark:shadow-black/20 overflow-hidden flex flex-col h-full">
+                        <header class="flex items-start gap-3 min-h-[120px]">
+                            <div class="relative flex-shrink-0 w-20 h-20 overflow-hidden rounded-lg border border-neutral-200 shadow-sm dark:border-neutral-700">
                                 @if ($team->logo_path)
                                     <img
                                         src="{{ asset('storage/'.$team->logo_path) }}"
                                         alt="{{ $team->name }}"
-                                        class="object-cover"
-                                        style="width:100%; height:100%; object-fit:cover; display:block;"
+                                        class="block h-full w-full object-cover"
                                     />
                                 @else
                                     <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-sky-500 text-lg font-semibold uppercase text-white">
@@ -42,14 +41,17 @@
                                     </div>
                                 @endif
                             </div>
-                            <div class="flex-1">
+                            <div class="flex-1 min-w-0 space-y-0.5">
                                 <p class="text-xs font-semibold uppercase tracking-wide text-neutral-400">{{ __('Equipo') }}</p>
-                                <h2 class="text-lg font-semibold text-neutral-900 dark:text-white">
-                                    {{ $team->name }}
-                                </h2>
-                                <p class="text-xs text-neutral-500 dark:text-neutral-300">
+                                <h2 class="text-lg font-semibold text-neutral-900 dark:text-white break-words leading-tight">{{ $team->name }}</h2>
+                                <p class="text-xs text-neutral-500 dark:text-neutral-300 truncate leading-tight" title="{{ $team->short_name }}">
                                     {{ $team->short_name ? __('Abreviatura: :short', ['short' => $team->short_name]) : __('Sin abreviatura definida') }}
                                 </p>
+                                @if ($team->coach_name)
+                                    <p class="text-xs text-neutral-500 dark:text-neutral-300 leading-tight">{{ __('DT: :name', ['name' => $team->coach_name]) }}</p>
+                                @else
+                                    <p class="text-xs text-neutral-500 dark:text-neutral-300 opacity-0 select-none leading-tight">DT: -</p>
+                                @endif
                             </div>
                             <div class="flex flex-col items-end gap-2">
                                 @if ($team->is_active)
@@ -63,18 +65,15 @@
                                         {{ __('Inactivo') }}
                                     </span>
                                 @endif
-                                @if ($team->coach_name)
-                                    <p class="text-xs text-neutral-500 dark:text-neutral-300">{{ __('DT: :name', ['name' => $team->coach_name]) }}</p>
-                                @endif
                             </div>
                         </header>
 
-                        <div class="mt-4 grid gap-3 text-sm text-neutral-600 dark:text-neutral-300">
+                        <div class="mt-4 grid gap-3 text-sm text-neutral-600 dark:text-neutral-300 flex-grow min-h-[120px]">
                             <div class="flex items-center gap-3">
                                 <span class="material-symbols-rounded text-xl text-indigo-500">person</span>
                                 <div>
                                     <p class="text-xs uppercase tracking-wide text-neutral-400">{{ __('Dueño') }}</p>
-                                    <p class="font-semibold text-neutral-900 dark:text-neutral-100">
+                                    <p class="font-semibold text-neutral-900 dark:text-neutral-100 break-words">
                                         {{ $team->owner_name ?? __('No asignado') }}
                                     </p>
                                 </div>
@@ -84,8 +83,8 @@
                                 <span class="material-symbols-rounded text-xl text-sky-500">mail</span>
                                 <div>
                                     <p class="text-xs uppercase tracking-wide text-neutral-400">{{ __('Contacto') }}</p>
-                                    <p>{{ $team->contact_email ?? __('Sin correo') }}</p>
-                                    <p>{{ $team->contact_phone ?? __('Sin teléfono') }}</p>
+                                    <p class="break-words">{{ $team->contact_email ?? __('Sin correo') }}</p>
+                                    <p class="break-words">{{ $team->contact_phone ?? __('Sin teléfono') }}</p>
                                 </div>
                             </div>
                         </div>

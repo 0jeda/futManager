@@ -40,4 +40,9 @@ class Game extends Model
     {
         return $this->hasMany(MatchParticipant::class, 'match_id');
     }
+
+    public function playerStats(): HasMany
+    {
+        return $this->hasMany(PlayerMatchStats::class, 'match_id');
+    }
 }

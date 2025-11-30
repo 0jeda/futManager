@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Player;
 use App\Models\Team;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class PlayerController extends Controller
 {
@@ -16,15 +20,41 @@ class PlayerController extends Controller
         $data = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'nullable|string|max:255',
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')],
+            'password' => 'nullable|string|min:6|max:255',
             'position' => 'nullable|string|max:50',
-            'number' => 'nullable|integer|min:0|max:255',
+            'number' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:255',
+                Rule::unique('players', 'number')->where(function ($query) use ($team) {
+                    return $query->where('team_id', $team->id);
+                }),
+            ],
             'birthdate' => 'nullable|date',
             'curp' => 'nullable|string|max:32',
             'photo' => 'nullable|image|max:2048',
+        ], [
+            'number.unique' => 'Este número de dorsal ya está asignado a otro jugador del equipo.',
         ]);
 
+        // Usar contraseña proporcionada o generar una aleatoria
+        $generatedPassword = $data['password'] ?? Str::random(10);
+        $passwordWasGenerated = empty($data['password']);
+
+        // Crear usuario para el jugador
+        $user = User::create([
+            'name' => trim($data['first_name'] . ' ' . ($data['last_name'] ?? '')),
+            'email' => $data['email'],
+            'password' => Hash::make($generatedPassword),
+            'role' => 'player',
+        ]);
+
+        // Crear el perfil de jugador
         $playerData = [
             'team_id' => $team->id,
+            'user_id' => $user->id,
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'] ?? null,
             'position' => $data['position'] ?? null,
@@ -39,7 +69,24 @@ class PlayerController extends Controller
 
         Player::create($playerData);
 
-        return redirect()->back()->with('status', __('Jugador agregado.'));
+        $sessionData = [
+            'status' => __('Jugador agregado correctamente.'),
+        ];
+
+        // Solo mostrar la contraseña si fue generada automáticamente
+        if ($passwordWasGenerated) {
+            $sessionData['player_credentials'] = [
+                'email' => $data['email'],
+                'password' => $generatedPassword,
+            ];
+        } else {
+            $sessionData['player_credentials_custom'] = [
+                'email' => $data['email'],
+                'message' => 'La contraseña personalizada fue establecida correctamente.',
+            ];
+        }
+
+        return redirect()->back()->with($sessionData);
     }
 
     public function update(Request $request, Player $player): RedirectResponse
@@ -47,11 +94,23 @@ class PlayerController extends Controller
         $data = $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'nullable|string|max:255',
+            'password' => 'nullable|string|min:6|max:255',
             'position' => 'nullable|string|max:50',
-            'number' => 'nullable|integer|min:0|max:255',
+            'number' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:255',
+                Rule::unique('players', 'number')->where(function ($query) use ($player) {
+                    return $query->where('team_id', $player->team_id);
+                })->ignore($player->id),
+            ],
             'birthdate' => 'nullable|date',
             'curp' => 'nullable|string|max:32',
             'photo' => 'nullable|image|max:2048',
+        ], [
+            'number.unique' => 'Este número de dorsal ya está asignado a otro jugador del equipo.',
+            'password.min' => 'La contraseña debe tener al menos 6 caracteres.',
         ]);
 
         $updateData = [
@@ -63,6 +122,13 @@ class PlayerController extends Controller
             'curp' => $data['curp'] ?? null,
         ];
 
+        // Actualizar contraseña si se proporcionó
+        if (!empty($data['password']) && $player->user) {
+            $player->user->update([
+                'password' => Hash::make($data['password']),
+            ]);
+        }
+
         if ($request->hasFile('photo')) {
             if ($player->photo_path) {
                 Storage::disk('public')->delete($player->photo_path);
@@ -73,7 +139,12 @@ class PlayerController extends Controller
 
         $player->update($updateData);
 
-        return redirect()->back()->with('status', __('Jugador actualizado.'));
+        $message = __('Jugador actualizado.');
+        if (!empty($data['password'])) {
+            $message .= ' ' . __('La contraseña fue cambiada correctamente.');
+        }
+
+        return redirect()->back()->with('status', $message);
     }
 
     public function destroy(Player $player): RedirectResponse
@@ -82,7 +153,15 @@ class PlayerController extends Controller
             Storage::disk('public')->delete($player->photo_path);
         }
 
+        // Guardar referencia al usuario antes de eliminar el jugador
+        $user = $player->user;
+
         $player->delete();
+
+        // Eliminar el usuario asociado si existe
+        if ($user) {
+            $user->delete();
+        }
 
         return redirect()->back()->with('status', __('Jugador eliminado.'));
     }
