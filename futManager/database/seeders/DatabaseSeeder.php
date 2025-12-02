@@ -31,6 +31,16 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        $normalUser = User::updateOrCreate(
+            ['email' => 'usuario@futmanager.com'],
+            [
+                'name' => 'Usuario Normal',
+                'password' => Hash::make('User!234'),
+                'role' => 'player',
+                'email_verified_at' => now(),
+            ]
+        );
+
         Owner::updateOrCreate(
             ['name' => 'Complejo Deportivo Reyes'],
             [
@@ -38,6 +48,31 @@ class DatabaseSeeder extends Seeder
                 'contact_email' => 'contacto@canchareyes.com',
                 'contact_phone' => '555-000-1234',
                 'notes' => 'Dueño principal del complejo.',
+            ]
+        );
+
+        // Crear un equipo de ejemplo
+        $team = Team::updateOrCreate(
+            ['name' => 'Equipo Demo'],
+            [
+                'owner_name' => 'Juan Pérez',
+                'short_name' => 'DEMO',
+                'coach_name' => 'Carlos López',
+                'contact_email' => 'demo@equipo.com',
+                'contact_phone' => '555-1234',
+                'is_active' => true,
+            ]
+        );
+
+        // Crear jugador para el usuario normal
+        Player::updateOrCreate(
+            ['user_id' => $normalUser->id],
+            [
+                'team_id' => $team->id,
+                'first_name' => 'Usuario',
+                'last_name' => 'Normal',
+                'position' => 'Delantero',
+                'number' => 10,
             ]
         );
     }

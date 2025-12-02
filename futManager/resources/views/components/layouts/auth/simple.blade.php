@@ -3,16 +3,18 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white antialiased dark:bg-linear-to-b dark:from-neutral-950 dark:to-neutral-900">
-        <div class="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-            <div class="flex w-full max-w-sm flex-col gap-2">
-                <a href="{{ route('home') }}" class="flex flex-col items-center gap-2 font-medium" wire:navigate>
-                    <span class="flex h-9 w-9 mb-1 items-center justify-center rounded-md">
-                        <x-app-logo-icon class="size-9 fill-current text-black dark:text-white" />
-                    </span>
-                    <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
-                </a>
-                <div class="flex flex-col gap-6">
+    <body class="min-h-screen bg-slate-950 text-white antialiased">
+        <div class="min-h-screen flex items-center justify-center px-4 py-10">
+            <div class="w-full max-w-md">
+                <div class="flex items-center justify-center gap-3 mb-6">
+                    <div class="h-11 w-11 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center text-base font-bold text-white">FM</div>
+                    <div class="text-center">
+                        <p class="text-sm text-emerald-100 font-semibold">FutManager</p>
+                        <p class="text-xs text-gray-300">Torneos sin ruido</p>
+                    </div>
+                </div>
+
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-8 shadow-xl shadow-black/20">
                     {{ $slot }}
                 </div>
             </div>
