@@ -89,14 +89,21 @@
                             </div>
                         </div>
 
-                        <div class="mt-4 grid gap-3 border-t border-neutral-100 pt-3 dark:border-neutral-800 sm:grid-cols-2">
+                        <div class="mt-4 grid gap-3 border-t border-neutral-100 pt-3 dark:border-neutral-800 grid-cols-3">
                             <a
                                 href="{{ route('teams.edit', $team) }}"
                                 class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-neutral-900 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-neutral-700 dark:bg-white dark:text-neutral-900"
                                 wire:navigate
                             >
                                 <span class="material-symbols-rounded text-base">edit</span>
-                                {{ __('Editar') }}
+                            </a>
+                            <a
+                                href="{{ route('teams.pdf', $team) }}"
+                                class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow hover:bg-indigo-500"
+                                target="_blank"
+                                title="Descargar Reporte"
+                            >
+                                <span class="material-symbols-rounded text-base">download</span>
                             </a>
                             <form method="POST" action="{{ route('teams.destroy', $team) }}" onsubmit="return confirm('{{ __('¿Eliminar este equipo?') }}')" class="flex">
                                 @csrf
@@ -106,7 +113,6 @@
                                     class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-rose-200 px-3 py-1.5 text-sm font-semibold text-rose-600 transition hover:border-rose-400 hover:bg-rose-50 dark:border-rose-500/40 dark:text-rose-200"
                                 >
                                     <span class="material-symbols-rounded text-base">delete</span>
-                                    {{ __('Eliminar') }}
                                 </button>
                             </form>
                         </div>
